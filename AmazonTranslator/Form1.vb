@@ -6,7 +6,7 @@ Public Class Form1
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         ' Test Mode disables the refreshTimer (loads all orders) and changes the folders.
         Dim test As Boolean = False
-        Dim manual As Boolean = True
+        Dim manual As Boolean = False
 
 
         Dim srcDirectory As String = "C:\Users\Administrator\amtu2\DocumentTransport\production\reports\"
@@ -64,6 +64,7 @@ Public Class Form1
                     tfp.ReadLine() 'Skips header
                     While tfp.EndOfData = False
                         file_data = tfp.ReadLine()
+                        file_data = Replace(file_data, ";", ",")
                         file_data = Replace(file_data, vbTab, ";")
                         Dim file_data_array As String() = file_data.Split(New Char() {";"c})
 
