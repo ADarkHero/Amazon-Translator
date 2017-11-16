@@ -4,25 +4,33 @@ Imports Microsoft.VisualBasic.FileIO
 
 Public Class Form1
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        ' Test Mode disables the refreshTimer (loads all orders) and changes the folders.
+        Dim test As Boolean = False
+        Dim manual As Boolean = False
+
+
+        Dim srcDirectory As String = "C:\Users\Administrator\amtu2\DocumentTransport\production\reports\"
+        Dim destDirectory As String = "C:\eNVenta-ERP\BMECat\Amazon\"
+        Dim logDirectory As String = "C:\eNVenta-ERP\BMECat\Amazon\log\"
+        Dim orderName As String = "ORDER*.txt"
+        Dim filename As String = "AmazonOrders.csv"
+        Dim logAllFilename As String = "AmazonOrdersALL.csv"
+        Dim logFile As String = "log.log"
+        Dim refreshTimer As Integer = 300
+
+
         Try
-            ' Test Mode disables the refreshTimer (loads all orders) and changes the folders.
-            Dim test As Boolean = False
-            Dim manual As Boolean = False
 
-
-            Dim srcDirectory As String = "C:\Users\Administrator\amtu2\DocumentTransport\production\reports\"
-            Dim destDirectory As String = "C:\eNVenta-ERP\BMECat\Amazon\"
-            Dim orderName As String = "ORDER*.txt"
-            Dim filename As String = "AmazonOrders.csv"
-            Dim refreshTimer As Integer = 360
 
             If test Then
                 destDirectory = "C:\Users\s.ewert\Desktop\"
+                logDirectory = "C:\Users\s.ewert\Desktop\"
                 srcDirectory = "C:\Users\s.ewert\amtu2\DocumentTransport\production\reports\"
                 refreshTimer = 6000000
             End If
             If manual Then
                 srcDirectory = "V:\BMECat\Amazon\Test"
+                logDirectory = "V:\BMECat\Amazon\Test\log"
                 destDirectory = "V:\BMECat\Amazon\"
                 refreshTimer = 6000000
             End If
@@ -30,6 +38,7 @@ Public Class Form1
             Dim text_file_path As String = ""
             Dim text_file_path_new As String = ""
             Dim file_dest As String = ""
+            Dim file_dest_logAll As String = ""
             Dim file_old As String = ""
             Dim file_data As String
 
@@ -43,6 +52,11 @@ Public Class Form1
             ' Generate CSV file
             Dim data As System.IO.StreamWriter
             data = My.Computer.FileSystem.OpenTextFileWriter(file_dest, False)
+
+            file_dest_logAll = logDirectory + logAllFilename
+            ' Log all orders
+            Dim logAll As System.IO.StreamWriter
+            logAll = My.Computer.FileSystem.OpenTextFileWriter(file_dest_logAll, True)
 
             If filenumber > 0 Then
                 For i As Integer = 0 To filenumber - 1
@@ -103,6 +117,7 @@ Public Class Form1
                             Next
 
                             data.WriteLine(file_data)
+                            logAll.WriteLine(file_data)
                             ' Shipping shouldn't be calculated two times
                             If String.Compare(old_order, file_data_array(0)) Then
                                 Dim shipping As String = ""
@@ -141,6 +156,7 @@ Public Class Form1
                                 Next
                                 ' Write shipping to file
                                 data.WriteLine(shipping)
+                                logAll.WriteLine(shipping)
                             End If
 
                             old_order = file_data_array(0)
@@ -149,13 +165,15 @@ Public Class Form1
                 Next
             Else
                 data.WriteLine()
+                logAll.WriteLine()
             End If
 
             data.Close()
+            logAll.Close()
 
             ' Log all exceptions
         Catch ex As Exception
-            IO.File.AppendAllText("log.log", String.Format("{0}{1}", Environment.NewLine, DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + " " + ex.ToString()))
+            IO.File.AppendAllText(logDirectory + logFile, String.Format("{0}{1}", Environment.NewLine, DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + " " + ex.ToString()))
         End Try
 
         Application.Exit()
